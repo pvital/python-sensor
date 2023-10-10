@@ -28,6 +28,8 @@ class CursorWrapper(wrapt.ObjectProxy):
                 span.set_tag(ext.DATABASE_INSTANCE, self._connect_params[1]['db'])
             elif 'database' in self._connect_params[1]:
                 span.set_tag(ext.DATABASE_INSTANCE, self._connect_params[1]['database'])
+            elif 'dbname' in self._connect_params[1]:
+                span.set_tag(ext.DATABASE_INSTANCE, self._connect_params[1]['dbname'])
 
             span.set_tag(ext.DATABASE_STATEMENT, sql_sanitizer(sql))
             span.set_tag(ext.DATABASE_USER, self._connect_params[1]['user'])
