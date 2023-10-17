@@ -261,6 +261,8 @@ class HostAgent(BaseAgent):
             span_count = len(payload['spans'])
             if span_count > 0:
                 logger.debug("Reporting %d spans", span_count)
+                for i, span in enumerate(payload['spans'], start=1):
+                    logger.debug(f"[{i} - Span ID: {span.s}\tTrace ID: {span.t}")
                 response = self.client.post(self.__traces_url(),
                                             data=to_json(payload['spans']),
                                             headers={"Content-Type": "application/json"},
