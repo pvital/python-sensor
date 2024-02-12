@@ -94,11 +94,10 @@ def set_agent(new_agent):
 # this package.
 tracer = InstanaTracer(recorder=span_recorder)
 
-if sys.version_info >= (3, 4):
+if sys.version_info >= (3, 7):
     try:
-        from opentracing.scope_managers.asyncio import AsyncioScopeManager
-
-        async_tracer = InstanaTracer(scope_manager=AsyncioScopeManager(), recorder=span_recorder)
+        from opentracing.scope_managers.contextvars import ContextVarsScopeManager
+        async_tracer = InstanaTracer(scope_manager=ContextVarsScopeManager(), recorder=span_recorder)
     except Exception:
         logger.debug("Error setting up async_tracer:", exc_info=True)
 
