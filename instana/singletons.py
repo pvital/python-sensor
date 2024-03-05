@@ -9,6 +9,8 @@ from .autoprofile.profiler import Profiler
 from .log import logger
 from .tracer import InstanaTracer
 
+from opentracing.scope_managers.contextvars import ContextVarsScopeManager
+
 agent = None
 tracer = None
 async_tracer = None
@@ -100,27 +102,11 @@ def set_agent(new_agent):
 # this package.
 tracer = InstanaTracer(recorder=span_recorder)
 
-try:
-    from opentracing.scope_managers.contextvars import ContextVarsScopeManager
-
-    async_tracer = InstanaTracer(
-        scope_manager=ContextVarsScopeManager(), recorder=span_recorder
-    )
-except Exception:
-    logger.debug("Error setting up async_tracer:", exc_info=True)
-
-# Mock the tornado tracer until tornado is detected and instrumented first
-tornado_tracer = tracer
-
-
-def setup_tornado_tracer():
-    global tornado_tracer
-    from opentracing.scope_managers.tornado import TornadoScopeManager
-
-    tornado_tracer = InstanaTracer(
-        scope_manager=TornadoScopeManager(), recorder=span_recorder
-    )
-
+# For asyncio and Tornado implementation we are using ContextVarsScopeManager()
+# as scope manager.
+async_tracer = InstanaTracer(
+    scope_manager=ContextVarsScopeManager(), recorder=span_recorder
+)
 
 # Set ourselves as the tracer.
 opentracing.tracer = tracer

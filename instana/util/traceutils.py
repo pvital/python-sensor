@@ -1,7 +1,7 @@
 # (c) Copyright IBM Corp. 2021
 # (c) Copyright Instana Inc. 2021
 
-from ..singletons import agent, tracer, async_tracer, tornado_tracer
+from ..singletons import agent, tracer, async_tracer
 from ..log import logger
 
 
@@ -22,8 +22,6 @@ def get_active_tracer():
             return tracer
         elif async_tracer.active_span:
             return async_tracer
-        elif tornado_tracer.active_span:
-            return tornado_tracer
         else:
             return None
     except Exception:

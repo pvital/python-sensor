@@ -6,32 +6,21 @@ import opentracing
 import wrapt
 
 from ...log import logger
-from ...singletons import agent, setup_tornado_tracer, tornado_tracer
+from ...singletons import agent, async_tracer
 from ...util.secrets import strip_secrets_from_query
 
 try:
     import tornado
 
-    # Tornado >=6.0 switched to contextvars for context management.  This requires changes to the opentracing
-    # scope managers which we will tackle soon.
-    # Limit Tornado version for the time being.
-    if not (hasattr(tornado, 'version') and tornado.version[0] < '6'):
-        logger.debug('Instana supports Tornado package versions < 6.0.  Skipping.')
-        raise ImportError
-
-    from opentracing.scope_managers.tornado import tracer_stack_context
-
-    setup_tornado_tracer()
-
     @wrapt.patch_function_wrapper('tornado.web', 'RequestHandler._execute')
     def execute_with_instana(wrapped, instance, argv, kwargs):
         try:
-            with tracer_stack_context():
-                ctx = None
-                if hasattr(instance.request.headers, '__dict__') and '_dict' in instance.request.headers.__dict__:
-                    ctx = tornado_tracer.extract(opentracing.Format.HTTP_HEADERS,
-                                                 instance.request.headers.__dict__['_dict'])
-                scope = tornado_tracer.start_active_span('tornado-server', child_of=ctx)
+            ctx = None
+            if hasattr(instance.request.headers, '__dict__') and '_dict' in instance.request.headers.__dict__:
+                ctx = async_tracer.extract(opentracing.Format.HTTP_HEADERS,
+                                                instance.request.headers.__dict__['_dict'])
+
+            with async_tracer.start_active_span('tornado-server', child_of=ctx) as scope:
 
                 # Query param scrubbing
                 if instance.request.query is not None and len(instance.request.query) > 0:
@@ -56,7 +45,7 @@ try:
 
                 # Set the context response headers now because tornado doesn't give us a better option to do so
                 # later for this request.
-                tornado_tracer.inject(scope.span.context, opentracing.Format.HTTP_HEADERS, instance._headers)
+                async_tracer.inject(scope.span.context, opentracing.Format.HTTP_HEADERS, instance._headers)
                 instance.set_header(name='Server-Timing', value="intid;desc=%s" % scope.span.context.trace_id)
 
                 return wrapped(*argv, **kwargs)
@@ -70,7 +59,7 @@ try:
             return wrapped(*argv, **kwargs)
 
         scope = instance.request._instana
-        tornado_tracer.inject(scope.span.context, opentracing.Format.HTTP_HEADERS, instance._headers)
+        async_tracer.inject(scope.span.context, opentracing.Format.HTTP_HEADERS, instance._headers)
         instance.set_header(name='Server-Timing', value="intid;desc=%s" % scope.span.context.trace_id)
 
 
@@ -111,5 +100,8 @@ try:
 
 
     logger.debug("Instrumenting tornado server")
-except ImportError:
-    pass
+except ImportError as err:
+    logger.debug(f"ImportError: {err}")
+except Exception as err:
+    logger.debug(f"Unexpected {err=}, {type(err)=}")
+    raise
