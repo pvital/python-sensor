@@ -29,9 +29,8 @@ class BaseOptions(object):
         self.service_name = determine_service_name()
         self.extra_http_headers = None
 
-        if "INSTANA_DEBUG" in os.environ:
-            self.log_level = logging.DEBUG
-            self.debug = True
+        self.log_level = logging.DEBUG
+        self.debug = True
 
         if "INSTANA_EXTRA_HTTP_HEADERS" in os.environ:
             self.extra_http_headers = str(os.environ["INSTANA_EXTRA_HTTP_HEADERS"]).lower().split(';')
