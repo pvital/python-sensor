@@ -295,14 +295,23 @@ class HostAgent(BaseAgent):
                 if response.status_code == 200 and len(response.content) > 2:
                     # The host agent returned something indicating that is has a request for us that we
                     # need to process.
+                    logger.debug(f"{response.content}")
                     self.handle_agent_tasks(json.loads(response.content)[0])
-        except requests.exceptions.ConnectionError:
+        except requests.exceptions.ConnectionError as exc:
+            logger.debug(
+                f"===> report_data_payload: Instana host agent connection error ({type(exc)})",
+                exc_info=True,
+            )
             pass
-        except urllib3.exceptions.MaxRetryError:
+        except urllib3.exceptions.MaxRetryError as exc:
+            logger.debug(
+                f"===> report_data_payload: Instana host agent max retry error ({type(exc)})",
+                exc_info=True,
+            )
             pass
         except Exception as exc:
             logger.debug(
-                f"report_data_payload: Instana host agent connection error ({type(exc)})",
+                f"===> report_data_payload: Instana host agent Exception ({type(exc)})",
                 exc_info=True,
             )
         return response
@@ -334,14 +343,22 @@ class HostAgent(BaseAgent):
         return
 
     def report_spans(self, payload: Dict[str, Any]) -> Optional[Response]:
+
+        if len(payload["spans"]) > 0:
+            for i, span in enumerate(payload['spans'], start=1):
+                logger.debug(f"===> [{i} - Span ID: {span.s}\tTrace ID: {span.t}")
+
         filtered_spans = self.filter_spans(payload.get("spans", []))
         if len(filtered_spans) > 0:
-            logger.debug(f"Reporting {len(filtered_spans)} spans")
+            # logger.debug(f"Reporting {len(filtered_spans)} spans")
             response = self.client.post(
                 self.__traces_url(),
                 data=to_json(filtered_spans),
                 headers={"Content-Type": "application/json"},
                 timeout=0.8,
+            )
+            logger.debug(
+                f"===> Reported {len(filtered_spans)} spans to {self.__traces_url()} with return {response.status_code}"
             )
             return response
         return

@@ -193,9 +193,11 @@ class InstanaSpan(Span, ReadableSpan):
         )
 
     def end(self, end_time: Optional[int] = None) -> None:
+        logger.debug(f"===> Closing span {self.context.span_id} of tracer {self.context.trace_id}...")
         with self._lock:
             self._end_time = end_time if end_time else time_ns()
             self._duration = self._end_time - self._start_time
+            logger.debug(f"===> Span {self.context.span_id} took {self._duration}...")
 
         self._span_processor.record_span(self._readable_span())
 

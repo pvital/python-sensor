@@ -43,13 +43,17 @@ class HostCollector(BaseCollector):
         state machine case.
         """
         try:
+            logger.debug("===> (host) Preparing to report data...")
             if self.agent.machine.fsm.current == "wait4init":
+                logger.debug("===> (host) Preparing to report data - 2...")
                 # Test the host agent if we're ready to send data
                 if self.agent.is_agent_ready():
+                    logger.debug("===> (host) Preparing to report data - 3...")
                     if self.agent.machine.fsm.current != "good2go":
                         logger.debug("Agent is ready.  Getting to work.")
                         self.agent.machine.fsm.ready()
                 else:
+                    logger.debug("===> (host) Preparing to report data - 4...")
                     return
 
             if (
@@ -64,7 +68,7 @@ class HostCollector(BaseCollector):
             logger.debug(
                 "Harmless state machine thread disagreement.  Will self-correct on next timer cycle."
             )
-
+        logger.debug("===> (host) Preparing to report data - 5...")
         super(HostCollector, self).prepare_and_report_data()
 
     def should_send_snapshot_data(self) -> bool:

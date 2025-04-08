@@ -11,18 +11,24 @@ try:
     from instana.log import logger
     from instana.singletons import agent
 
+    logger.debug("===> Initializing uWSGI hooks.")
+
     import uwsgi
 
     logger.debug(
-        f"uWSGI options: {uwsgi.opt}",
+        f"===> uWSGI options: {uwsgi.opt}",
     )
 
     opt_master = uwsgi.opt.get("master", False)
     opt_lazy_apps = uwsgi.opt.get("lazy-apps", False)
+    opt_enable_threads = uwsgi.opt.get("enable-threads", False)
+    opt_gevent = uwsgi.opt.get("gevent", False)
 
-    if not uwsgi.opt.get("enable-threads", False) and not uwsgi.opt.get(
-        "gevent", False
-    ):
+    logger.debug(
+        f"===> uWSGI options: {opt_master=} {opt_lazy_apps=} {opt_enable_threads=} {opt_gevent=}"
+    )
+
+    if not opt_enable_threads and not opt_gevent:
         logger.warning(
             "Required: Neither uWSGI threads or gevent is enabled. "
             + "Please enable by using the uWSGI --enable-threads or --gevent option."

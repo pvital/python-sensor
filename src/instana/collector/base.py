@@ -150,9 +150,12 @@ class BaseCollector(object):
         Prepare and report the data payload.
         @return: Boolean
         """
+        logger.debug("===> (base) Preparing to report data...")
         with self.background_report_lock:
             payload = self.prepare_payload()
+            logger.debug("===> (base) Preparing to report data...payload built")
             self.agent.report_data_payload(payload)
+            logger.debug("===> (base) Preparing to report data...Done")
         return True
 
     def prepare_payload(self):
