@@ -55,6 +55,8 @@ try:
 
         def process_request(self, request: Type["HttpRequest"]) -> None:
             try:
+                logger.debug("django process_request init")
+
                 env = request.META
 
                 span_context = tracer.extract(Format.HTTP_HEADERS, env)
@@ -82,6 +84,7 @@ try:
                     request.span.set_attribute("http.params", scrubbed_params)
                 if "HTTP_HOST" in env:
                     request.span.set_attribute(SpanAttributes.HTTP_HOST, env["HTTP_HOST"])
+                logger.debug(f"django process_request end: {span.name}, {span.context.trace_id}")
             except Exception:
                 logger.debug("Django middleware @ process_request", exc_info=True)
 
@@ -90,6 +93,7 @@ try:
         ) -> "HttpResponse":
             try:
                 if request.span:
+                    logger.debug("django process_response init")
                     if 500 <= response.status_code:
                         request.span.assure_errored()
                     # for django >= 2.2
@@ -119,6 +123,9 @@ try:
                             request.span, response.headers, format=False
                         )
                     tracer.inject(request.span.context, Format.HTTP_HEADERS, response)
+                    logger.debug(
+                        f"django process_response end: {request.span.name}, {request.span.context.trace_id}"
+                    )
             except Exception:
                 logger.debug("Instana middleware @ process_response", exc_info=True)
             finally:
@@ -245,11 +252,15 @@ try:
             from django.core.servers.basehttp import get_internal_wsgi_application
             from django.core.exceptions import ImproperlyConfigured
 
+            logger.debug("Instrumenting django 2")
+
             try:
                 wsgiapp = get_internal_wsgi_application()
                 wsgiapp.load_middleware()
             except ImproperlyConfigured:
                 pass
+
+            logger.debug("Instrumenting django 3")
 
     except Exception:
         logger.debug("django.middleware:", exc_info=True)
