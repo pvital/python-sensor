@@ -64,7 +64,6 @@ class HostCollector(BaseCollector):
             logger.debug(
                 "Harmless state machine thread disagreement.  Will self-correct on next timer cycle."
             )
-
         super(HostCollector, self).prepare_and_report_data()
 
     def should_send_snapshot_data(self) -> bool:

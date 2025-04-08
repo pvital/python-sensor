@@ -7,6 +7,7 @@ import os
 import queue
 from typing import TYPE_CHECKING, List, Optional, Type
 
+from instana.log import logger
 from instana.span.kind import REGISTERED_SPANS
 from instana.span.readable_span import ReadableSpan
 from instana.span.registered_span import RegisteredSpan
@@ -62,10 +63,13 @@ class StanRecorder(object):
         """
         Convert the passed span into JSON and add it to the span queue.
         """
+        logger.debug(f"===> Recording span: {span.context.span_id}")
         if span.context.suppression:
+            logger.debug(f"===> Span {span.context.span_id} is suppressed.")
             return
 
         if self.agent.can_send():
+            # logger.debug(f"===> Putting span {span.context.span_id} in the queue.")
             service_name = None
             source = self.agent.get_from_structure()
             if "INSTANA_SERVICE_NAME" in os.environ:
@@ -79,3 +83,6 @@ class StanRecorder(object):
 
             # logger.debug("Recorded span: %s", json_span)
             self.agent.collector.span_queue.put(json_span)
+            logger.debug(f"===> Span {span.context.span_id} is in the queue.")
+        else:
+            logger.debug(f"===> Span {span.context.span_id} will not be sent.")
