@@ -29,6 +29,7 @@ class HostCollector(BaseCollector):
         self.helpers.append(RuntimeHelper(self))
 
     def start(self) -> None:
+        logger.debug("===> Starting Host Collector...")
         if self.ready_to_start is False:
             logger.warning(
                 "Host Collector is missing requirements and cannot monitor this environment."

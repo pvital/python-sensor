@@ -60,7 +60,7 @@ class HostAgent(BaseAgent):
         self.update_log_level()
 
         logger.info(
-            f"Stan is on the scene.  Starting Instana instrumentation version: {VERSION}"
+            f"Stan is on the scene.  Starting Instana instrumentation version: {VERSION}."
         )
 
         self.collector = HostCollector(self)
@@ -72,7 +72,7 @@ class HostAgent(BaseAgent):
 
         This method is called after a successful announce.  See fsm.py
         """
-        logger.debug("Starting Host Collector")
+        logger.debug("Starting Host Collector.")
         self.collector.start()
 
     def handle_fork(self) -> None:

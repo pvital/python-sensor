@@ -65,8 +65,23 @@ class BaseCollector(object):
         Indicates if there is a thread running with the name self.THREAD_NAME
         """
         for thread in threading.enumerate():
+            logger.debug(
+                f"===> BaseCollector.is_reporting_thread_running: {thread.name}"
+            )
             if thread.name == self.THREAD_NAME:
+                logger.debug(
+                    "===> BaseCollector.is_reporting_thread_running: Match"
+                )
+                logger.debug(
+                    f"===> BaseCollector.is_reporting_thread_running: thread_shutdown {self.thread_shutdown.is_set()}"
+                )
+                logger.debug(
+                    f"===> BaseCollector.is_reporting_thread_running:  self.started {self.started}"
+                )
                 return True
+        logger.debug(
+            "===> BaseCollector.is_reporting_thread_running: NO Match"
+        )
         return False
 
     def start(self):
@@ -74,8 +89,11 @@ class BaseCollector(object):
         Starts the collector and starts reporting as long as the agent is in a ready state.
         @return: None
         """
+        logger.debug("===> Starting Base Collector...")
         if self.is_reporting_thread_running():
+            logger.debug("===> BaseCollector is_reporting_thread_running")
             if self.thread_shutdown.is_set():
+                logger.debug("===> BaseCollector thread_shutdown.is_set")
                 # Shutdown still in progress; Reschedule this start in 5 seconds from now
                 timer = threading.Timer(5, self.start)
                 timer.daemon = True
@@ -88,6 +106,8 @@ class BaseCollector(object):
             )
             return
 
+        logger.debug("===> BaseCollector is_reporting_thread_NOT_running")
+        logger.debug(f"===> BaseCollector agent: {self.agent}")
         if self.agent.can_send():
             logger.debug("BaseCollector.start: launching collection thread")
             self.thread_shutdown.clear()
