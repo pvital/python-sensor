@@ -3,4 +3,4 @@
 
 # Module version file.  Used by setup.py and snapshot reporting.
 
-VERSION = "3.4.0+dev.celero.debug.7"
+VERSION = "3.4.0+dev.celero.debug.8"

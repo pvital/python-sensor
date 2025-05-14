@@ -95,15 +95,17 @@ class BaseCollector(object):
             logger.debug("===> BaseCollector is_reporting_thread_running")
             if self.thread_shutdown.is_set():
                 logger.debug("===> BaseCollector thread_shutdown.is_set")
-                # Shutdown still in progress; Reschedule this start in 5 seconds from now
+                # Force a restart. 
+                # Re-execute the shutdown
+                self.shutdown(report_final=False)
+                # Reschedule this start in 5 seconds from now
                 timer = threading.Timer(5, self.start)
                 timer.daemon = True
                 timer.name = "Collector Timed Start"
                 timer.start()
                 return
             logger.debug(
-                "BaseCollector.start non-fatal: call but thread already running (started: %s)",
-                self.started,
+                f"BaseCollector.start non-fatal: call but thread already running (started: {self.started})"
             )
             return
 
