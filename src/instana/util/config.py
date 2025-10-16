@@ -14,6 +14,7 @@ SPAN_CATEGORIES = [
     "databases",
     "messaging",
     "protocols",  # http, grpc, etc.
+    "stack",  # stack trace collection
 ]
 
 # Mapping of span type calls (framework, library name, instrumentation name) to categories
