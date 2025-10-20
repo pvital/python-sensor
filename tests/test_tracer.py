@@ -185,6 +185,25 @@ def test_tracer_add_stack_high_limit(
     assert "m" in stack_0.keys()
 
 
+def test_tracer_add_stack_disabled(
+    span: InstanaSpan, tracer_provider: InstanaTracerProvider, mocker
+) -> None:
+    tracer = InstanaTracer(
+        tracer_provider.sampler,
+        tracer_provider._span_processor,
+        tracer_provider._exporter,
+        tracer_provider._propagators,
+    )
+
+    # Mock agent.options.is_span_disabled to return True for "stack" category
+    mocker.patch("instana.singletons.agent.options.is_span_disabled", return_value=True)
+
+    tracer._add_stack(span, 30)
+
+    # Verify that no stack trace was added to the span
+    assert span.stack is None
+
+
 def test_tracer_add_stack_low_limit(
     span: InstanaSpan, tracer_provider: InstanaTracerProvider
 ) -> None:
