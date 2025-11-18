@@ -19,6 +19,7 @@ class TestSpanDisabling:
         options = BaseOptions()
         assert not options.is_span_disabled(category="logging")
         assert not options.is_span_disabled(category="databases")
+        assert not options.is_span_disabled(category="stack")
         assert not options.is_span_disabled(span_type="redis")
 
     def test_disable_category(self):
@@ -55,6 +56,7 @@ class TestSpanDisabling:
         assert options.is_span_disabled(category="databases") is True
         assert options.is_span_disabled(category="messaging") is True
         assert options.is_span_disabled(category="protocols") is True
+        assert options.is_span_disabled(category="stack") is True
 
     def test_env_var_disable_specific(self, monkeypatch):
         monkeypatch.setenv("INSTANA_TRACING_DISABLE", "logging, redis")
@@ -74,6 +76,18 @@ class TestSpanDisabling:
         assert options.is_span_disabled(category="databases")
         assert options.is_span_disabled(span_type="mysql")
         assert not options.is_span_disabled(span_type="redis")
+
+    def test_disable_stack_category(self):
+        options = BaseOptions()
+        options.disabled_spans = ["stack"]
+        assert options.is_span_disabled(category="stack")
+        assert not options.is_span_disabled(category="logging")
+
+    def test_env_var_disable_stack(self, monkeypatch):
+        monkeypatch.setenv("INSTANA_TRACING_DISABLE", "stack")
+        options = BaseOptions()
+        assert options.is_span_disabled(category="stack") is True
+        assert options.is_span_disabled(category="logging") is False
 
 
 # Made with Bob

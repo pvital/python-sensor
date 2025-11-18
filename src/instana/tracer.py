@@ -30,6 +30,7 @@ from instana.propagators.kafka_propagator import KafkaPropagator
 from instana.propagators.text_propagator import TextPropagator
 from instana.recorder import StanRecorder
 from instana.sampling import InstanaSampler, Sampler
+from instana.singletons import agent
 from instana.span.kind import EXIT_SPANS
 from instana.span.span import InstanaSpan, get_current_span
 from instana.span_context import SpanContext
@@ -179,6 +180,10 @@ class InstanaTracer(Tracer):
         Adds a backtrace to <span>.  The default length limit for
         stack traces is 30 frames.  A hard limit of 40 frames is enforced.
         """
+        # Skip stack trace collection if it's disabled
+        if agent.options.is_span_disabled(category="stack"):
+            return
+
         try:
             sanitized_stack = []
             if limit > 40:
