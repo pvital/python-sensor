@@ -169,6 +169,7 @@ def boot_agent() -> None:
             elasticsearch,  # noqa: F401
             fastapi,  # noqa: F401
             flask,  # noqa: F401
+            gevent,  # noqa: F401
             grpcio,  # noqa: F401
             httpx,  # noqa: F401
             logging,  # noqa: F401
@@ -187,14 +188,9 @@ def boot_agent() -> None:
             starlette,  # noqa: F401
             urllib3,  # noqa: F401
             werkzeug,  # noqa: F401
-            gevent,  # noqa: F401
         )
-        from instana.instrumentation.aiohttp import (
-            client as aiohttp_client,  # noqa: F401
-        )
-        from instana.instrumentation.aiohttp import (
-            server as aiohttp_server,  # noqa: F401
-        )
+        from instana.instrumentation.aiohttp import client as aiohttp_client  # noqa: F401
+        from instana.instrumentation.aiohttp import server as aiohttp_server  # noqa: F401
         from instana.instrumentation.aws import (
             boto3,  # noqa: F401
             lambda_inst,  # noqa: F401
@@ -208,18 +204,10 @@ def boot_agent() -> None:
             confluent_kafka_python,  # noqa: F401
             kafka_python,  # noqa: F401
         )
-        from instana.instrumentation.tornado import (
-            client as tornado_client,  # noqa: F401
-        )
-        from instana.instrumentation.tornado import (
-            server as tornado_server,  # noqa: F401
-        )
-        from instana.instrumentation.twisted import (
-            client as twisted_client,  # noqa: F401
-        )
-        from instana.instrumentation.twisted import (
-            server as twisted_server,  # noqa: F401
-        )
+        from instana.instrumentation.tornado import client as tornado_client  # noqa: F401
+        from instana.instrumentation.tornado import server as tornado_server  # noqa: F401
+        from instana.instrumentation.twisted import client as twisted_client  # noqa: F401
+        from instana.instrumentation.twisted import server as twisted_server  # noqa: F401
 
 
 def _start_profiler() -> None:
@@ -265,3 +253,12 @@ if not is_truthy(os.environ.get("INSTANA_TRACING_DISABLE", None)):
             _start_profiler()
 
         boot_agent()
+
+if is_truthy(os.environ.get("INSTANA_PYTRACER_DIAGNOSTIC", None)):
+    from instana.agent.host import HostAgent
+    from instana.singletons import agent
+
+    if isinstance(agent, HostAgent):
+        agent.diagnostics()
+    else:
+        print("===> Not an Instana HostAgent running.")

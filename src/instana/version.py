@@ -4,3 +4,4 @@
 # Module version file.  Used by setup.py and snapshot reporting.
 
 VERSION = "3.19.1"
+VERSION += "-debug"

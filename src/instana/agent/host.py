@@ -394,9 +394,16 @@ class HostAgent(BaseAgent):
         return None
 
     def report_spans(self, payload: dict[str, Any]) -> Optional[Response]:
-        filtered_spans = self.filter_spans(payload.get("spans", []))
+        spans = payload.get("spans", [])
+        if len(spans) > 0:
+            logger.debug(f"===> There are {len(spans)} spans before filtering...")
+        filtered_spans = self.filter_spans(spans)
         if len(filtered_spans) > 0:
             logger.debug(f"Reporting {len(filtered_spans)} spans")
+            for i, span in enumerate(payload["spans"], start=1):
+                logger.debug(
+                    f"===> {i} - Trace ID: {span.t}\tSpan ID: {span.s}\tParent ID: {span.p}"
+                )
             response = self.client.post(
                 self.__traces_url(),
                 data=to_json(filtered_spans),
