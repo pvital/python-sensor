@@ -14,6 +14,7 @@ import importlib
 import os
 import sys
 from importlib import util as importlib_util
+
 from instana.collector.helpers.runtime import (
     is_autowrapt_instrumented,
     is_webhook_instrumented,
@@ -373,3 +374,12 @@ if not is_truthy(os.environ.get("INSTANA_TRACING_DISABLE", None)):
                 _start_profiler()
 
             boot_agent()
+
+if is_truthy(os.environ.get("INSTANA_PYTRACER_DIAGNOSTIC", None)):
+    from instana.agent.host import HostAgent
+    from instana.singletons import agent
+
+    if isinstance(agent, HostAgent):
+        agent.diagnostics()
+    else:
+        print("===> Not an Instana HostAgent running.")

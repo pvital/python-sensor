@@ -96,9 +96,8 @@ class BaseOptions(object):
         """
         # Use self.configurations to not read local configuration file
         # in set_tracing method
-        if "INSTANA_DEBUG" in os.environ:
-            self.log_level = logging.DEBUG
-            self.debug = True
+        self.log_level = logging.DEBUG
+        self.debug = True
 
         if "INSTANA_EXTRA_HTTP_HEADERS" in os.environ:
             self.extra_http_headers = (
@@ -160,11 +159,12 @@ class BaseOptions(object):
             self.http_exit_classify_all_4xx_as_errors = is_truthy(
                 os.environ["INSTANA_TRACING_HTTP_EXIT_CLASSIFY_ALL_4XX_AS_ERRORS"]
             )
-            logger.debug(
-                "INSTANA_TRACING_HTTP_EXIT_CLASSIFY_ALL_4XX_AS_ERRORS = True"
-            )
+            logger.debug("INSTANA_TRACING_HTTP_EXIT_CLASSIFY_ALL_4XX_AS_ERRORS = True")
         elif "INSTANA_CONFIG_PATH" in os.environ:
-            self.http_exit_classify_all_4xx_as_errors, self.http_exit_classify_as_errors = get_http_exit_classification_from_yaml()
+            (
+                self.http_exit_classify_all_4xx_as_errors,
+                self.http_exit_classify_as_errors,
+            ) = get_http_exit_classification_from_yaml()
 
     def _add_instana_agent_span_filter(self) -> None:
         """Add Instana agent span filter to exclude internal spans."""
@@ -402,7 +402,23 @@ class StandardOptions(BaseOptions):
     AGENT_DEFAULT_HOST = "localhost"
     AGENT_DEFAULT_PORT = 42699
     DEFAULT_POLL_RATE = 1
-    VALID_POLL_RATES = [1, 5, 10, 20, 30, 60, 120, 180, 240, 300, 360, 420, 480, 540, 600]
+    VALID_POLL_RATES = [
+        1,
+        5,
+        10,
+        20,
+        30,
+        60,
+        120,
+        180,
+        240,
+        300,
+        360,
+        420,
+        480,
+        540,
+        600,
+    ]
 
     def __init__(self, **kwds: dict[str, Any]) -> None:
         super(StandardOptions, self).__init__()
